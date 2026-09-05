@@ -32,7 +32,7 @@ from pyspark.sql import functions as F
 )
 def product_catalog():
     return (
-        spark.readStream
+        spark.readStream  # noqa: F821
         .table("dbr_dev.postgres_bronze.product_catalog")
         .select(
             # Standardize product_id
