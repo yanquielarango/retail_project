@@ -15,7 +15,17 @@ from pyspark.sql import functions as F
 )
 @dp.expect(
     "valid_stage",
-    "stage_name IN ('Prospecting','Closed Won','Closed Lost')"
+    """
+    stage_name IN (
+        'Prospecting',
+        'Qualification',
+        'Needs Analysis',
+        'Proposal/Price Quote',
+        'Negotiation/Review',
+        'Closed Won',
+        'Closed Lost'
+    )
+    """
 )
 def opportunity():
     source_df = (
