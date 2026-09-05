@@ -20,3 +20,12 @@ resources:
 
         - file:
             path: ../src/silver/inventory.py
+
+        - file:
+            path: ../src/silver/account.py
+
+        - file:
+            path: ../src/silver/opportunity.py
+
+        - file:
+            path: ../src/silver/transactions.py
