@@ -17,3 +17,6 @@ resources:
       libraries:
         - file:
             path: ../src/silver/product_catalog.py
+
+        - file:
+            path: ../src/silver/inventory.py

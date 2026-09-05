@@ -36,7 +36,7 @@ from pyspark.sql import functions as F
 )
 def inventory():
     return (
-        spark.readStream
+        spark.readStream  # noqa: F821
         .table("dbr_dev.postgres_bronze.inventory")
         .select(
             F.upper(
