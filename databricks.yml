@@ -1,0 +1,26 @@
+bundle:
+  name: retail-data-platform
+
+include:
+  - resources/*.yml
+
+variables:
+  catalog:
+    description: Unity Catalog catalog
+    default: dbr_dev
+
+  silver_schema:
+    description: Silver schema
+    default: retail_silver
+
+targets:
+  dev:
+    mode: development
+    default: true
+
+    workspace:
+      host: https://dbc-c04a5ad1-7844.cloud.databricks.com
+
+    variables:
+      catalog: dbr_dev
+      silver_schema: retail_silver

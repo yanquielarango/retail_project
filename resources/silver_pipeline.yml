@@ -1,0 +1,19 @@
+resources:
+  schemas:
+    silver:
+      name: ${var.silver_schema}
+      catalog_name: ${var.catalog}
+      comment: Silver layer for the retail data platform
+
+  pipelines:
+    silver_pipeline:
+      name: ${bundle.target}-retail-silver
+
+      catalog: ${resources.schemas.silver.catalog_name}
+      schema: ${resources.schemas.silver.name}
+
+      serverless: true
+
+      libraries:
+        - file:
+            path: ../src/silver/product_catalog.py
