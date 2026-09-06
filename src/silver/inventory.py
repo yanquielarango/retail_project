@@ -1,6 +1,6 @@
 from pyspark import pipelines as dp
 
-from transformations.silver.inventory import build_inventory
+from transformations.silver.inventory_functions import build_inventory
 
 
 @dp.table(

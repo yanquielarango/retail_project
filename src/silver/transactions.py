@@ -1,6 +1,6 @@
 from pyspark import pipelines as dp
 
-from transformations.silver.transactions import build_transactions
+from transformations.silver.transactions_functions import build_transactions
 
 
 @dp.table(

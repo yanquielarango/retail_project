@@ -1,6 +1,6 @@
 from pyspark import pipelines as dp
 
-from transformations.silver.opportunity import build_opportunity
+from transformations.silver.opportunity_functions import build_opportunity
 
 
 @dp.table(

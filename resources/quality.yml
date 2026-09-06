@@ -1,0 +1,6 @@
+resources:
+  schemas:
+    quarantine:
+      name: ${var.quarantine_schema}
+      catalog_name: ${var.catalog}
+      comment: Quarantined records rejected by DQX

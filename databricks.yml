@@ -17,6 +17,18 @@ variables:
     description: Gold schema
     default: retail_gold
 
+  quarantine_schema:
+    description: Schema for quarantined records
+    default: retail_quarantine
+
+  postgres_pipeline_id:
+    description: Existing PostgreSQL Lakeflow Connect pipeline ID
+    default: c9e7e6e4-3304-4702-9692-6488eb75df2a
+
+  salesforce_pipeline_id:
+    description: Existing Salesforce Lakeflow Connect pipeline ID
+    default: 2d5762da-9458-47c5-b224-c24459f163ad
+
 targets:
   dev:
     default: true
@@ -28,3 +40,4 @@ targets:
       catalog: dbr_dev
       silver_schema: retail_silver
       gold_schema: retail_gold
+      quarantine_schema: retail_quarantine

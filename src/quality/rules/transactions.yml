@@ -1,0 +1,65 @@
+- name: non_null_transaction_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: transaction_id
+      trim_strings: true
+
+- name: valid_quantity
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "quantity > 0"
+
+- name: valid_selling_price
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "selling_price >= 0"
+
+- name: valid_discount_amount
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "discount_amount >= 0"
+
+- name: non_null_product_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: product_id
+      trim_strings: true
+
+- name: non_null_store_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: store_id
+      trim_strings: true
+
+- name: valid_payment_mode
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "payment_mode IS NOT NULL AND payment_mode IN ('BLIK', 'Card', 'Cash', 'Bank Transfer')"
+
+- name: valid_sales_channel
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "sales_channel IS NOT NULL AND sales_channel IN ('Online', 'Store')"
+
+- name: valid_transaction_timestamp
+  criticality: error
+  check:
+    function: is_not_null
+    arguments:
+      column: transaction_timestamp

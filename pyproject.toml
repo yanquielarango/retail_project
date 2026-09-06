@@ -1,0 +1,12 @@
+[project]
+name = "retail-project-1"
+version = "0.1.0"
+requires-python = ">=3.12"
+dependencies = [
+    "databricks-labs-dqx[cli]==0.16.0",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=9.1.1",
+]
