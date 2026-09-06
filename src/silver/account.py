@@ -1,9 +1,9 @@
 from pyspark import pipelines as dp
 
-from transformations.silver.account import build_account
+from transformations.silver.account_functions import build_account
 
 
-@dp.table(
+@dp.materialized_view(
     name="account",
     comment="Silver Salesforce account data with standardized fields and quality monitoring"
 )
@@ -25,7 +25,7 @@ from transformations.silver.account import build_account
 )
 def account():
     source_df = (
-        spark.readStream  # noqa: F821
+        spark.read  # noqa: F821
         .table("dbr_dev.salesforce_bronze.account")
     )
 
