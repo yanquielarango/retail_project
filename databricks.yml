@@ -13,6 +13,10 @@ variables:
     description: Silver schema
     default: retail_silver
 
+  gold_schema:
+    description: Gold schema
+    default: retail_gold
+
 targets:
   dev:
     default: true
@@ -23,3 +27,4 @@ targets:
     variables:
       catalog: dbr_dev
       silver_schema: retail_silver
+      gold_schema: retail_gold

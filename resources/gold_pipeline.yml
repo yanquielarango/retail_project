@@ -1,0 +1,27 @@
+resources:
+  schemas:
+    gold:
+      name: ${var.gold_schema}
+      catalog_name: ${var.catalog}
+      comment: Gold layer for the retail data platform
+
+  pipelines:
+    gold_pipeline:
+      name: ${bundle.target}-retail-gold
+
+      catalog: ${resources.schemas.gold.catalog_name}
+      schema: ${resources.schemas.gold.name}
+
+      serverless: true
+      root_path: ../src
+
+      configuration:
+        catalog: ${var.catalog}
+        silver_schema: ${var.silver_schema}
+        gold_schema: ${resources.schemas.gold.name}
+        start_date: "2024-01-01"
+        end_date: "2030-12-31"
+
+      libraries:
+        - glob:
+            include: ../src/gold/**
