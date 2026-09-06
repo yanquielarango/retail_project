@@ -6,11 +6,11 @@ from pyspark.sql import functions as F
     name="product_catalog",
     comment="Silver product catalog with standardized data and quality rules"
 )
-@dp.expect_or_drop(
+@dp.expect(
     "valid_product_id",
     "product_id IS NOT NULL AND LENGTH(TRIM(product_id)) > 0"
 )
-@dp.expect_or_drop(
+@dp.expect(
     "valid_product_name",
     "product_name IS NOT NULL AND LENGTH(TRIM(product_name)) > 0"
 )
@@ -22,7 +22,7 @@ from pyspark.sql import functions as F
     "valid_price",
     "unit_price > 0"
 )
-@dp.expect_or_drop(
+@dp.expect(
     "valid_launch_date",
     "launch_date IS NOT NULL"
 )
@@ -35,22 +35,18 @@ def product_catalog():
         spark.readStream  # noqa: F821
         .table("dbr_dev.postgres_bronze.product_catalog")
         .select(
-            # Standardize product_id
             F.upper(
                 F.trim(F.col("product_id"))
             ).alias("product_id"),
 
-            # Standardize product_name
             F.initcap(
                 F.trim(F.col("product_name"))
             ).alias("product_name"),
 
-            # Standardize category
             F.initcap(
                 F.trim(F.col("category"))
             ).alias("category"),
 
-            # Standardize subcategory
             F.when(
                 F.col("subcategory").isNotNull(),
                 F.initcap(F.trim(F.col("subcategory")))
@@ -58,7 +54,6 @@ def product_catalog():
             .otherwise(F.lit("Unknown"))
             .alias("subcategory"),
 
-            # Standardize brand
             F.when(
                 F.col("brand").isNotNull(),
                 F.initcap(F.trim(F.col("brand")))
@@ -66,19 +61,16 @@ def product_catalog():
             .otherwise(F.lit("Unknown"))
             .alias("brand"),
 
-            # Standardize unit price
             F.round(
                 F.col("unit_price"), 2
             ).alias("unit_price"),
 
-            # Standardize supplier
             F.initcap(
                 F.trim(F.col("supplier_name"))
             ).alias("supplier_name"),
 
             F.col("launch_date"),
 
-            # Product segmentation in PLN
             F.when(
                 F.col("unit_price") >= 3000,
                 "PREMIUM"
@@ -90,11 +82,10 @@ def product_catalog():
             .otherwise("BUDGET")
             .alias("product_segment"),
 
-            # CDC / SCD tracking columns
+            # CDC / SCD columns exist in this PostgreSQL Bronze table
             F.col("__START_AT").alias("start_at"),
             F.col("__END_AT").alias("end_at"),
 
-            # Current record indicator
             F.when(
                 F.col("__END_AT").isNull(),
                 F.lit(True)
@@ -104,7 +95,6 @@ def product_catalog():
 
             F.col("updated_at"),
 
-            # Audit column
             F.current_timestamp().alias("processed_at")
         )
     )
