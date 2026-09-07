@@ -8,7 +8,7 @@ SILVER_SCHEMA = spark.conf.get("silver_schema")  # noqa: F821
 
 @dp.materialized_view(
     name="dim_customer",
-    comment="Customer dimension built from Salesforce account data",
+    comment="Customer dimension for Gold analytics",
     table_properties={
         "quality": "gold",
         "layer": "gold",
@@ -16,7 +16,7 @@ SILVER_SCHEMA = spark.conf.get("silver_schema")  # noqa: F821
 )
 def dim_customer():
     source_df = spark.read.table(  # noqa: F821
-        f"{CATALOG}.{SILVER_SCHEMA}.account"
+        f"{CATALOG}.{SILVER_SCHEMA}.account_valid"
     )
 
     return build_dim_customer(source_df)
