@@ -1,0 +1,52 @@
+- name: non_null_inventory_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: inventory_id
+      trim_strings: true
+
+- name: non_null_product_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: product_id
+      trim_strings: true
+
+- name: non_null_store_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: store_id
+      trim_strings: true
+
+- name: valid_stock_quantity
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "stock_quantity IS NOT NULL AND stock_quantity >= 0"
+
+- name: valid_reorder_level
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "reorder_level IS NOT NULL AND reorder_level >= 0"
+
+- name: non_null_warehouse_location
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: warehouse_location
+      trim_strings: true
+
+- name: non_null_last_stock_update
+  criticality: error
+  check:
+    function: is_not_null
+    arguments:
+      column: last_stock_update

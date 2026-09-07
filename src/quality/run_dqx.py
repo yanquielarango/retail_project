@@ -6,6 +6,14 @@ from databricks.labs.dqx.engine import DQEngine
 from databricks.sdk import WorkspaceClient
 from pyspark.sql import SparkSession
 
+DATASETS = [
+    "transactions",
+    "opportunity",
+    "inventory",
+    "product_catalog",
+    "account",
+]
+
 
 def parse_args():
     parser = argparse.ArgumentParser()
@@ -17,18 +25,22 @@ def parse_args():
     return parser.parse_args()
 
 
-def main():
-    args = parse_args()
-
-    spark = SparkSession.builder.getOrCreate()
-
+def process_dataset(
+    spark,
+    dq_engine,
+    dataset,
+    catalog,
+    silver_schema,
+    quarantine_schema,
+):
     rules_path = (
         Path.cwd()
         / "rules"
-        / "transactions.yml"
+        / f"{dataset}.yml"
     )
 
-    dq_engine = DQEngine(WorkspaceClient())
+    print(f"Processing DQX dataset: {dataset}")
+    print(f"Rules file: {rules_path}")
 
     checks = dq_engine.load_checks(
         config=FileChecksStorageConfig(
@@ -41,11 +53,12 @@ def main():
 
     if validation_status.has_errors:
         raise ValueError(
-            f"Invalid DQX checks: {validation_status.errors}"
+            f"Invalid DQX checks for {dataset}: "
+            f"{validation_status.errors}"
         )
 
     source_df = spark.read.table(
-        f"{args.catalog}.{args.silver_schema}.transactions"
+        f"{catalog}.{silver_schema}.{dataset}"
     )
 
     valid_df, quarantine_df = (
@@ -60,7 +73,7 @@ def main():
         .mode("overwrite")
         .option("overwriteSchema", "true")
         .saveAsTable(
-            f"{args.catalog}.{args.silver_schema}.transactions_valid"
+            f"{catalog}.{silver_schema}.{dataset}_valid"
         )
     )
 
@@ -69,9 +82,28 @@ def main():
         .mode("overwrite")
         .option("overwriteSchema", "true")
         .saveAsTable(
-            f"{args.catalog}.{args.quarantine_schema}.transactions"
+            f"{catalog}.{quarantine_schema}.{dataset}"
         )
     )
+
+    print(f"DQX completed successfully for: {dataset}")
+
+
+def main():
+    args = parse_args()
+
+    spark = SparkSession.builder.getOrCreate()
+    dq_engine = DQEngine(WorkspaceClient())
+
+    for dataset in DATASETS:
+        process_dataset(
+            spark=spark,
+            dq_engine=dq_engine,
+            dataset=dataset,
+            catalog=args.catalog,
+            silver_schema=args.silver_schema,
+            quarantine_schema=args.quarantine_schema,
+        )
 
 
 if __name__ == "__main__":

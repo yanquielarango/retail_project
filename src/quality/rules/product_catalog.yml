@@ -1,0 +1,51 @@
+- name: non_null_product_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: product_id
+      trim_strings: true
+
+- name: non_null_product_name
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: product_name
+      trim_strings: true
+
+- name: valid_category
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "category IS NOT NULL AND category IN ('Electronics', 'Mobile', 'Appliances', 'Furniture', 'Groceries', 'Fashion', 'Accessories', 'Lifestyle')"
+
+- name: valid_unit_price
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "unit_price IS NOT NULL AND unit_price >= 0"
+
+- name: non_null_supplier_name
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: supplier_name
+      trim_strings: true
+
+- name: non_null_start_at
+  criticality: error
+  check:
+    function: is_not_null
+    arguments:
+      column: start_at
+
+- name: non_null_updated_at
+  criticality: error
+  check:
+    function: is_not_null
+    arguments:
+      column: updated_at

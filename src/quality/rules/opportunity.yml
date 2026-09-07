@@ -1,0 +1,51 @@
+- name: non_null_opportunity_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: id
+      trim_strings: true
+
+- name: non_null_account_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: account_id
+      trim_strings: true
+
+- name: non_null_opportunity_name
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: name
+      trim_strings: true
+
+- name: valid_stage_name
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "stage_name IS NOT NULL AND stage_name IN ('Prospecting', 'Qualification', 'Needs Analysis', 'Proposal/Price Quote', 'Negotiation/Review', 'Closed Won', 'Closed Lost')"
+
+- name: valid_amount
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "amount IS NOT NULL AND amount >= 0"
+
+- name: valid_probability
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "probability IS NULL OR (probability >= 0 AND probability <= 100)"
+
+- name: non_null_close_date
+  criticality: error
+  check:
+    function: is_not_null
+    arguments:
+      column: close_date
