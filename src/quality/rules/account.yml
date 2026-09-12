@@ -1,0 +1,36 @@
+- name: non_null_account_id
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: id
+      trim_strings: true
+
+- name: non_null_customer_name
+  criticality: error
+  check:
+    function: is_not_null_and_not_empty
+    arguments:
+      column: customer_name
+      trim_strings: true
+
+- name: valid_annual_revenue
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "annual_revenue IS NULL OR annual_revenue >= 0"
+
+- name: valid_number_of_employees
+  criticality: error
+  check:
+    function: sql_expression
+    arguments:
+      expression: "number_of_employees IS NULL OR number_of_employees >= 0"
+
+- name: non_null_start_at
+  criticality: error
+  check:
+    function: is_not_null
+    arguments:
+      column: start_at

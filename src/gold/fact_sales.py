@@ -2,6 +2,7 @@ from pyspark import pipelines as dp
 
 from transformations.gold.fact_sales_functions import build_fact_sales
 
+
 CATALOG = spark.conf.get("catalog")  # noqa: F821
 SILVER_SCHEMA = spark.conf.get("silver_schema")  # noqa: F821
 
@@ -16,11 +17,11 @@ SILVER_SCHEMA = spark.conf.get("silver_schema")  # noqa: F821
 )
 def fact_sales():
     transactions_df = spark.read.table(  # noqa: F821
-        f"{CATALOG}.{SILVER_SCHEMA}.transactions"
+        f"{CATALOG}.{SILVER_SCHEMA}.transactions_valid"
     )
 
     opportunity_df = spark.read.table(  # noqa: F821
-        f"{CATALOG}.{SILVER_SCHEMA}.opportunity"
+        f"{CATALOG}.{SILVER_SCHEMA}.opportunity_valid"
     )
 
     return build_fact_sales(
