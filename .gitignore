@@ -1,3 +1,7 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
 
 # Databricks App template helper files
 app/retail_rag_assistant/.claude/
