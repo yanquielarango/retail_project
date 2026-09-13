@@ -1,6 +1,10 @@
 name: Retail Data Platform CI/CD - Refactor Test
 
 on:
+  push:
+    branches:
+      - refactor/github-actions-workflows
+
   pull_request:
     branches:
       - main
@@ -8,4 +12,20 @@ on:
 jobs:
   validate:
     uses: ./.github/workflows/validate.yml
+    secrets: inherit
+
+  deploy_dev:
+    needs: validate
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch'
+    uses: ./.github/workflows/deploy-dev.yml
+    secrets: inherit
+
+  integration_tests:
+    needs: deploy_dev
+    uses: ./.github/workflows/integration-tests.yml
+    secrets: inherit
+
+  rag_dev:
+    needs: integration_tests
+    uses: ./.github/workflows/rag-dev.yml
     secrets: inherit
