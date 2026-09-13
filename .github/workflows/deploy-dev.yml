@@ -1,0 +1,27 @@
+name: Deploy DEV
+
+on:
+  workflow_call:
+
+jobs:
+  deploy_dev:
+    name: Deploy to DEV
+    runs-on: ubuntu-latest
+    environment: dev
+
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Deploy bundle to DEV
+        run: databricks bundle deploy -t dev
+
+      - name: Run DEV data workflow
+        run: databricks bundle run retail_workflow -t dev
