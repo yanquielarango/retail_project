@@ -1,0 +1,30 @@
+resources:
+  apps:
+    retail_rag_assistant:
+      name: agent-retail-rag-assistant
+
+      description: >
+        Retail Data Platform RAG assistant powered by Databricks AI Search
+        and a foundation model. Provides grounded answers using platform
+        documentation and curated product data.
+
+      source_code_path: ../app/retail_rag_assistant
+
+      resources:
+        - name: experiment
+          description: The destination experiment for agent execution traces.
+          experiment:
+            experiment_id: ${resources.experiments.retail_rag_agent.id}
+            permission: CAN_EDIT
+
+        - name: vector-search-index
+          uc_securable:
+            permission: SELECT
+            securable_full_name: ${resources.vector_search_indexes.rag_index.name}
+            securable_kind: TABLE_ONLINE_VECTOR_INDEX_REPLICA
+            securable_type: TABLE
+
+        - name: serving-endpoint
+          serving_endpoint:
+            name: databricks-qwen3-next-80b-a3b-instruct
+            permission: CAN_QUERY

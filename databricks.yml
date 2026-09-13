@@ -1,5 +1,6 @@
 bundle:
   name: retail-data-platform
+  engine: direct
 
 include:
   - resources/*.yml
@@ -21,6 +22,10 @@ variables:
     description: Schema for quarantined records
     default: retail_quarantine
 
+  ai_schema:
+    description: Schema for AI and RAG resources
+    default: retail_ai
+
   postgres_pipeline_id:
     description: Existing PostgreSQL Lakeflow Connect pipeline ID
     default: c9e7e6e4-3304-4702-9692-6488eb75df2a
@@ -41,3 +46,4 @@ targets:
       silver_schema: retail_silver
       gold_schema: retail_gold
       quarantine_schema: retail_quarantine
+      ai_schema: retail_ai

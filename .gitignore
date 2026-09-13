@@ -1,0 +1,15 @@
+
+# Databricks App template helper files
+app/retail_rag_assistant/.claude/
+app/retail_rag_assistant/.github/
+app/retail_rag_assistant/AGENTS.md
+app/retail_rag_assistant/CLAUDE.md
+
+# Root Asset Bundle manages the application
+app/retail_rag_assistant/databricks.yml
+
+# Unused Databricks App template scripts
+app/retail_rag_assistant/scripts/discover_tools.py
+app/retail_rag_assistant/scripts/grant_lakebase_permissions.py
+app/retail_rag_assistant/scripts/preflight.py
+app/retail_rag_assistant/scripts/quickstart.py
