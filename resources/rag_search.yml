@@ -1,0 +1,20 @@
+resources:
+  vector_search_endpoints:
+    rag_endpoint:
+      name: ${bundle.target}-retail-rag-endpoint
+      endpoint_type: STANDARD
+
+  vector_search_indexes:
+    rag_index:
+      name: ${var.catalog}.${var.ai_schema}.rag_index
+      endpoint_name: ${resources.vector_search_endpoints.rag_endpoint.name}
+      primary_key: chunk_id
+      index_type: DELTA_SYNC
+
+      delta_sync_index_spec:
+        source_table: ${var.catalog}.${var.ai_schema}.rag_chunks
+        pipeline_type: TRIGGERED
+
+        embedding_source_columns:
+          - name: chunk_to_embed
+            embedding_model_endpoint_name: databricks-qwen3-embedding-0-6b

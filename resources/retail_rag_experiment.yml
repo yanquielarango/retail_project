@@ -1,0 +1,4 @@
+resources:
+  experiments:
+    retail_rag_agent:
+      name: /Shared/${bundle.target}-retail-rag-agent
