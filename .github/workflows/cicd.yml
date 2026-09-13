@@ -1,0 +1,10 @@
+name: Retail Data Platform CI/CD - Refactor Test
+
+on:
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  validate:
+    uses: ./.github/workflows/validate.yml

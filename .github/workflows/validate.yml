@@ -1,0 +1,39 @@
+name: Validate
+
+on:
+  workflow_call:
+
+jobs:
+  validate:
+    name: Validate and test
+    runs-on: ubuntu-latest
+    environment: dev
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Set up uv
+        uses: astral-sh/setup-uv@20cfd1bf945f4377ade1205e4dbc17946fc9a30d
+        with:
+          enable-cache: true
+
+      - name: Install unit test dependencies
+        run: uv sync --only-group unit --frozen
+
+      - name: Run unit tests
+        run: uv run --only-group unit pytest tests/unit -m unit
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Validate Databricks bundle
+        run: databricks bundle validate -t dev
+        env:
+          DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN: ${{ secrets.DATABRICKS_TOKEN }}
