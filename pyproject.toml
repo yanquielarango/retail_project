@@ -11,6 +11,11 @@ dev = [
     "pytest>=9.1.1",
 ]
 
+unit = [
+    { include-group = "dev" },
+    "pyspark==4.0.3",
+]
+
 [tool.pytest.ini_options]
 pythonpath = ["src"]
 markers = [

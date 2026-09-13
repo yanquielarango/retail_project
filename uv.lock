@@ -861,6 +861,15 @@ wheels = [
 ]
 
 [[package]]
+name = "pyspark"
+version = "4.0.3"
+source = { registry = "https://pypi.org/simple" }
+dependencies = [
+    { name = "py4j" },
+]
+sdist = { url = "https://files.pythonhosted.org/packages/6e/c1/671a7a00aea800d25fbbfc7d91539b4cf34a995d085ae708f26a2aeaa140/pyspark-4.0.3.tar.gz", hash = "sha256:9ed23e8601d73afae857eb5f9e11050b59cd11bbe50777564fcc4923cb117c1c", size = 434225451, upload-time = "2026-06-11T07:06:42.661Z" }
+
+[[package]]
 name = "pytest"
 version = "9.1.1"
 source = { registry = "https://pypi.org/simple" }
@@ -970,12 +979,20 @@ dependencies = [
 dev = [
     { name = "pytest" },
 ]
+unit = [
+    { name = "pyspark" },
+    { name = "pytest" },
+]
 
 [package.metadata]
 requires-dist = [{ name = "databricks-labs-dqx", extras = ["cli"], specifier = "==0.16.0" }]
 
 [package.metadata.requires-dev]
 dev = [{ name = "pytest", specifier = ">=9.1.1" }]
+unit = [
+    { name = "pyspark", specifier = "==4.0.3" },
+    { name = "pytest", specifier = ">=9.1.1" },
+]
 
 [[package]]
 name = "setuptools"
