@@ -72,6 +72,20 @@ targets:
       host: https://adb-7405604503619901.1.azuredatabricks.net
       root_path: /Workspace/retail-data-platform-prod/.bundle/${bundle.name}/${bundle.target}
 
+    permissions:
+      - user_name: yanquiel@softserve.academy
+        level: CAN_MANAGE
+
+      - service_principal_name: 5a04fc47-c432-4ca9-aad4-948dc214f9c4
+        level: CAN_MANAGE
+
+    resources:
+      experiments:
+        retail_rag_agent:
+          permissions:
+            - service_principal_name: ${resources.apps.retail_rag_assistant.service_principal_client_id}
+              level: CAN_EDIT
+
     variables:
       catalog: dbr_dev
       postgres_pipeline_id: cefbe66e-b1f9-4d32-8dae-cb10df26bd25

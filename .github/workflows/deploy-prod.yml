@@ -1,7 +1,7 @@
 name: Deploy PROD
 
 on:
-  workflow_call:
+  workflow_dispatch:
 
 permissions:
   id-token: write
@@ -14,36 +14,32 @@ jobs:
     environment: prod
 
     env:
-      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
-      DATABRICKS_AUTH_TYPE: azure-cli
+      DATABRICKS_HOST: https://adb-7405604503619901.1.azuredatabricks.net
+      DATABRICKS_AUTH_TYPE: github-oidc-azure
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Azure login with OIDC
-        uses: azure/login@v2
-        with:
-          client-id: ${{ vars.AZURE_CLIENT_ID }}
-          tenant-id: ${{ vars.AZURE_TENANT_ID }}
-          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
-
-      - name: Verify Azure identity
-        run: az account show
-
       - name: Set up Databricks CLI
         uses: databricks/setup-cli@main
 
-      - name: Verify Databricks authentication
+      - name: Verify PROD authentication
+        working-directory: /tmp
         run: databricks current-user me
 
       - name: Validate PROD bundle
         run: databricks bundle validate -t prod
 
+      - name: Plan PROD deployment
+        run: databricks bundle plan -t prod
+
       - name: Deploy bundle to PROD
         run: databricks bundle deploy -t prod
 
-      - name: Run PROD workflow
+      - name: Run PROD data workflow
         run: databricks bundle run retail_workflow -t prod
 
       - name: Build PROD RAG source
