@@ -1,0 +1,38 @@
+name: Bind PROD Schemas
+
+on:
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  bind_prod_schemas:
+    name: Bind existing PROD schemas
+    runs-on: ubuntu-latest
+    environment: prod
+
+    env:
+      DATABRICKS_HOST: https://adb-7405604503619901.1.azuredatabricks.net
+      DATABRICKS_AUTH_TYPE: github-oidc-azure
+      ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
+      ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Bind PROD schemas
+        run: |
+          databricks bundle deployment bind ai dbr_dev.retail_ai -t prod --auto-approve
+          databricks bundle deployment bind bronze dbr_dev.blob_bronze -t prod --auto-approve
+          databricks bundle deployment bind gold dbr_dev.retail_gold -t prod --auto-approve
+          databricks bundle deployment bind quarantine dbr_dev.retail_quarantine -t prod --auto-approve
+          databricks bundle deployment bind silver dbr_dev.retail_silver -t prod --auto-approve
+
+      - name: Check PROD plan
+        run: databricks bundle plan -t prod
