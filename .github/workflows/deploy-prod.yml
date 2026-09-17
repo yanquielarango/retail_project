@@ -1,0 +1,53 @@
+name: Deploy PROD
+
+on:
+  workflow_call:
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  deploy_prod:
+    name: Deploy to PROD
+    runs-on: ubuntu-latest
+    environment: prod
+
+    env:
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
+      DATABRICKS_AUTH_TYPE: azure-cli
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login with OIDC
+        uses: azure/login@v2
+        with:
+          client-id: ${{ vars.AZURE_CLIENT_ID }}
+          tenant-id: ${{ vars.AZURE_TENANT_ID }}
+          subscription-id: ${{ vars.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Verify Azure identity
+        run: az account show
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Verify Databricks authentication
+        run: databricks current-user me
+
+      - name: Validate PROD bundle
+        run: databricks bundle validate -t prod
+
+      - name: Deploy bundle to PROD
+        run: databricks bundle deploy -t prod
+
+      - name: Run PROD workflow
+        run: databricks bundle run retail_workflow -t prod
+
+      - name: Build PROD RAG source
+        run: databricks bundle run rag_build_source -t prod
+
+      - name: Deploy PROD RAG assistant
+        run: databricks bundle run retail_rag_assistant -t prod

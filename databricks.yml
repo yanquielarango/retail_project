@@ -2,13 +2,19 @@ bundle:
   name: retail-data-platform
   engine: direct
 
+experimental:
+  skip_name_prefix_for_schema: true
+
 include:
   - resources/*.yml
 
 variables:
   catalog:
     description: Unity Catalog catalog
-    default: dbr_dev
+
+  bronze_schema:
+    description: Bronze schema for CSV ingestion
+    default: blob_bronze
 
   silver_schema:
     description: Silver schema
@@ -26,24 +32,47 @@ variables:
     description: Schema for AI and RAG resources
     default: retail_ai
 
+  volume_schema:
+    description: Schema containing Unity Catalog volumes
+    default: volumes
+
+  blob_volume:
+    description: Volume containing CSV source files
+    default: blob_source
+
+  pdf_volume:
+    description: Volume containing RAG PDF documents
+    default: retail_knowledge
+
   postgres_pipeline_id:
     description: Existing PostgreSQL Lakeflow Connect pipeline ID
-    default: c9e7e6e4-3304-4702-9692-6488eb75df2a
 
   salesforce_pipeline_id:
     description: Existing Salesforce Lakeflow Connect pipeline ID
-    default: 2d5762da-9458-47c5-b224-c24459f163ad
 
 targets:
   dev:
     default: true
+
+    presets:
+      name_prefix: ""
 
     workspace:
       host: https://dbc-c04a5ad1-7844.cloud.databricks.com
 
     variables:
       catalog: dbr_dev
-      silver_schema: retail_silver
-      gold_schema: retail_gold
-      quarantine_schema: retail_quarantine
-      ai_schema: retail_ai
+      postgres_pipeline_id: c9e7e6e4-3304-4702-9692-6488eb75df2a
+      salesforce_pipeline_id: 2d5762da-9458-47c5-b224-c24459f163ad
+
+  prod:
+    mode: production
+
+    workspace:
+      host: https://adb-7405604503619901.1.azuredatabricks.net
+      root_path: /Workspace/Users/yanquiel@softserve.academy/.bundle/${bundle.name}/${bundle.target}
+
+    variables:
+      catalog: dbr_dev
+      postgres_pipeline_id: cefbe66e-b1f9-4d32-8dae-cb10df26bd25
+      salesforce_pipeline_id: 2bcf0095-ff34-4de3-966c-14a87d051481

@@ -1,0 +1,6 @@
+resources:
+  schemas:
+    ai:
+      name: ${var.ai_schema}
+      catalog_name: ${var.catalog}
+      comment: AI and RAG resources for the retail data platform

@@ -3,6 +3,7 @@ import os
 from typing import AsyncGenerator
 
 import mlflow
+
 from agents import (
     Agent,
     Runner,
@@ -81,6 +82,7 @@ def search_retail_knowledge(
     Search the Retail Data Platform knowledge base.
 
     Use this tool to retrieve information about:
+
     - products and product information
     - product sales performance
     - suppliers and categories
@@ -101,7 +103,8 @@ def search_retail_knowledge(
         index_name=RAG_INDEX_NAME,
         query_text=question,
         columns=RETRIEVAL_COLUMNS,
-        num_results=3,
+        num_results=10,
+        query_type="HYBRID",
     )
 
     response_dict = response.as_dict()
@@ -155,6 +158,16 @@ def search_retail_knowledge(
             or "Unknown"
         )
 
+        product_id = (
+            document.get("product_id")
+            or "N/A"
+        )
+
+        category = (
+            document.get("category")
+            or "N/A"
+        )
+
         content = (
             document.get("chunk_to_retrieve")
             or ""
@@ -163,6 +176,8 @@ def search_retail_knowledge(
         context_parts.append(
             f"Source: {source_uri}\n"
             f"Document type: {document_type}\n"
+            f"Product ID: {product_id}\n"
+            f"Category: {category}\n"
             f"Content:\n{content}"
         )
 
@@ -203,6 +218,13 @@ AGENT_INSTRUCTIONS = (
     "about that product unless the user explicitly asks for "
     "a comparison. "
 
+    "When the user asks what products are available, "
+    "list the specific products found in the retrieved context "
+    "instead of describing only the product table structure. "
+
+    "If product names are present in the retrieved context, "
+    "include them in the answer. "
+
     "Never rank products or use claims such as highest, lowest, "
     "best, worst, most, or least unless the user explicitly asks "
     "for a comparison or ranking and the retrieved context "
@@ -212,6 +234,7 @@ AGENT_INSTRUCTIONS = (
     "explicitly asks for a calculation. "
 
     "IMPORTANT: Invalid Silver records may be quarantined. "
+
     "Never say that all Lakeflow Expectations must pass before "
     "Gold can run. "
 
@@ -277,7 +300,6 @@ def create_agent() -> Agent:
 async def invoke_handler(
     request: ResponsesAgentRequest,
 ) -> ResponsesAgentResponse:
-
     if session_id := get_session_id(request):
         mlflow.update_current_trace(
             metadata={
@@ -318,7 +340,6 @@ async def stream_handler(
     ResponsesAgentStreamEvent,
     None,
 ]:
-
     if session_id := get_session_id(request):
         mlflow.update_current_trace(
             metadata={
