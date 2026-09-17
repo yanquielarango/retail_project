@@ -2,14 +2,13 @@ bundle:
   name: retail-data-platform
   engine: direct
 
+experimental:
+  skip_name_prefix_for_schema: true
+
 include:
   - resources/*.yml
 
 variables:
-  # ----------------------------------------------------------
-  # Unity Catalog
-  # ----------------------------------------------------------
-
   catalog:
     description: Unity Catalog catalog
 
@@ -33,10 +32,6 @@ variables:
     description: Schema for AI and RAG resources
     default: retail_ai
 
-  # ----------------------------------------------------------
-  # Volumes
-  # ----------------------------------------------------------
-
   volume_schema:
     description: Schema containing Unity Catalog volumes
     default: volumes
@@ -49,40 +44,27 @@ variables:
     description: Volume containing RAG PDF documents
     default: retail_knowledge
 
-  # ----------------------------------------------------------
-  # Existing Lakeflow Connect pipelines
-  # ----------------------------------------------------------
-
   postgres_pipeline_id:
     description: Existing PostgreSQL Lakeflow Connect pipeline ID
 
   salesforce_pipeline_id:
     description: Existing Salesforce Lakeflow Connect pipeline ID
 
-
 targets:
-
-  # ==========================================================
-  # DEV
-  # ==========================================================
-
   dev:
     default: true
     mode: development
+
+    presets:
+      name_prefix: ""
 
     workspace:
       host: https://dbc-c04a5ad1-7844.cloud.databricks.com
 
     variables:
       catalog: dbr_dev
-
       postgres_pipeline_id: c9e7e6e4-3304-4702-9692-6488eb75df2a
       salesforce_pipeline_id: 2d5762da-9458-47c5-b224-c24459f163ad
-
-
-  # ==========================================================
-  # PROD
-  # ==========================================================
 
   prod:
     mode: production
@@ -93,6 +75,5 @@ targets:
 
     variables:
       catalog: dbr_dev
-
       postgres_pipeline_id: cefbe66e-b1f9-4d32-8dae-cb10df26bd25
       salesforce_pipeline_id: 2bcf0095-ff34-4de3-966c-14a87d051481
