@@ -1,0 +1,42 @@
+name: Test PROD OIDC
+
+on:
+  workflow_dispatch:
+
+  push:
+    branches:
+      - refactor/github-actions-workflows
+
+permissions:
+  id-token: write
+  contents: read
+
+jobs:
+  test_prod_oidc:
+    name: Test PROD OIDC
+    runs-on: ubuntu-latest
+    environment: prod
+
+    env:
+      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_AUTH_TYPE: azure-cli
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Azure login with OIDC
+        uses: azure/login@v3
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          allow-no-subscriptions: true
+
+      - name: Set up Databricks CLI
+        uses: databricks/setup-cli@main
+
+      - name: Verify Azure identity
+        run: az account show
+
+      - name: Verify Databricks authentication
+        run: databricks current-user me

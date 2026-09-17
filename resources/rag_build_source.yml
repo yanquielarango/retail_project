@@ -5,8 +5,26 @@ resources:
 
       tasks:
         - task_key: build_rag_source
+
           spark_python_task:
             python_file: ../src/rag/build_rag_source.py
+
+            parameters:
+              - "--catalog"
+              - "${var.catalog}"
+
+              - "--gold-schema"
+              - "${var.gold_schema}"
+
+              - "--ai-schema"
+              - "${var.ai_schema}"
+
+              - "--volume-schema"
+              - "${var.volume_schema}"
+
+              - "--pdf-volume"
+              - "${var.pdf_volume}"
+
           environment_key: default
 
       environments:

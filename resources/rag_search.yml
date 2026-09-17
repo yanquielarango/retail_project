@@ -7,7 +7,9 @@ resources:
   vector_search_indexes:
     rag_index:
       name: ${var.catalog}.${var.ai_schema}.rag_index
+
       endpoint_name: ${resources.vector_search_endpoints.rag_endpoint.name}
+
       primary_key: chunk_id
       index_type: DELTA_SYNC
 
