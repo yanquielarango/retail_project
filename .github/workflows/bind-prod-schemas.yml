@@ -1,4 +1,4 @@
-name: Bind PROD Resources
+name: Discover PROD Resources
 
 on:
   workflow_dispatch:
@@ -8,8 +8,8 @@ permissions:
   contents: read
 
 jobs:
-  bind_prod_resources:
-    name: Bind existing PROD resources
+  discover_prod_resources:
+    name: Discover existing PROD resources
     runs-on: ubuntu-latest
     environment: prod
 
@@ -26,186 +26,33 @@ jobs:
       - name: Set up Databricks CLI
         uses: databricks/setup-cli@main
 
-      - name: Verify PROD authentication
+      - name: Verify PROD identity
         working-directory: /tmp
         run: databricks current-user me
 
-      - name: Create PROD plan
-        run: databricks bundle plan -t prod -o json > prod-plan.json
+      - name: List PROD jobs
+        working-directory: /tmp
+        run: databricks jobs list -o json
 
-      - name: Discover and bind existing PROD resources
-        shell: bash
-        run: |
-          set -euo pipefail
+      - name: List PROD pipelines
+        working-directory: /tmp
+        run: databricks pipelines list-pipelines -o json
 
-          get_resource_name() {
-            jq -r --arg key "$1" \
-              '.resources[$key].new_state.value.name // empty' \
-              prod-plan.json
-          }
+      - name: List PROD apps
+        working-directory: /tmp
+        run: databricks apps list -o json
 
-          RAG_JOB_NAME=$(get_resource_name "resources.jobs.rag_build_source")
-          WORKFLOW_JOB_NAME=$(get_resource_name "resources.jobs.retail_workflow")
-          GOLD_PIPELINE_NAME=$(get_resource_name "resources.pipelines.gold_pipeline")
-          SILVER_PIPELINE_NAME=$(get_resource_name "resources.pipelines.silver_pipeline")
-          APP_NAME=$(get_resource_name "resources.apps.retail_rag_assistant")
-          EXPERIMENT_NAME=$(get_resource_name "resources.experiments.retail_rag_agent")
-          VECTOR_ENDPOINT_NAME=$(get_resource_name "resources.vector_search_endpoints.rag_endpoint")
-          VECTOR_INDEX_NAME=$(get_resource_name "resources.vector_search_indexes.rag_index")
+      - name: List PROD experiments
+        working-directory: /tmp
+        run: databricks experiments list-experiments --view-type ALL -o json
 
-          echo "Bundle resource names:"
-          echo "RAG job: $RAG_JOB_NAME"
-          echo "Retail workflow: $WORKFLOW_JOB_NAME"
-          echo "Gold pipeline: $GOLD_PIPELINE_NAME"
-          echo "Silver pipeline: $SILVER_PIPELINE_NAME"
-          echo "App: $APP_NAME"
-          echo "Experiment: $EXPERIMENT_NAME"
-          echo "Vector endpoint: $VECTOR_ENDPOINT_NAME"
-          echo "Vector index: $VECTOR_INDEX_NAME"
+      - name: List PROD Vector Search endpoints
+        working-directory: /tmp
+        run: databricks vector-search-endpoints list-endpoints -o json
 
-          RAG_JOB_ID=$(
-            databricks jobs list \
-              --name "$RAG_JOB_NAME" \
-              -o json |
-            jq -r '
-              if type == "array"
-              then .[0].job_id // empty
-              else .jobs[0].job_id // empty
-              end
-            '
-          )
+      - name: List indexes from PROD RAG endpoint
+        working-directory: /tmp
+        run: databricks vector-search-indexes list-indexes prod-retail-rag-endpoint -o json
 
-          WORKFLOW_JOB_ID=$(
-            databricks jobs list \
-              --name "$WORKFLOW_JOB_NAME" \
-              -o json |
-            jq -r '
-              if type == "array"
-              then .[0].job_id // empty
-              else .jobs[0].job_id // empty
-              end
-            '
-          )
-
-          PIPELINES_JSON=$(databricks pipelines list-pipelines -o json)
-
-          GOLD_PIPELINE_ID=$(
-            echo "$PIPELINES_JSON" |
-            jq -r --arg name "$GOLD_PIPELINE_NAME" '
-              if type == "array"
-              then .[]
-              else (.statuses // .pipelines // [])[]
-              end
-              | select(.name == $name)
-              | .pipeline_id
-            ' |
-            head -n 1
-          )
-
-          SILVER_PIPELINE_ID=$(
-            echo "$PIPELINES_JSON" |
-            jq -r --arg name "$SILVER_PIPELINE_NAME" '
-              if type == "array"
-              then .[]
-              else (.statuses // .pipelines // [])[]
-              end
-              | select(.name == $name)
-              | .pipeline_id
-            ' |
-            head -n 1
-          )
-
-          EXPERIMENT_ID=$(
-            databricks experiments get-by-name \
-              "$EXPERIMENT_NAME" \
-              -o json |
-            jq -r '
-              .experiment.experiment_id
-              // .experiment_id
-              // empty
-            '
-          )
-
-          require_value() {
-            if [ -z "$2" ] || [ "$2" = "null" ]; then
-              echo "ERROR: Could not resolve $1"
-              exit 1
-            fi
-          }
-
-          require_value "RAG job ID" "$RAG_JOB_ID"
-          require_value "Retail workflow job ID" "$WORKFLOW_JOB_ID"
-          require_value "Gold pipeline ID" "$GOLD_PIPELINE_ID"
-          require_value "Silver pipeline ID" "$SILVER_PIPELINE_ID"
-          require_value "App name" "$APP_NAME"
-          require_value "Experiment ID" "$EXPERIMENT_ID"
-          require_value "Vector Search endpoint" "$VECTOR_ENDPOINT_NAME"
-          require_value "Vector Search index" "$VECTOR_INDEX_NAME"
-
-          echo "Resolved remote resources:"
-          echo "RAG job ID: $RAG_JOB_ID"
-          echo "Retail workflow ID: $WORKFLOW_JOB_ID"
-          echo "Gold pipeline ID: $GOLD_PIPELINE_ID"
-          echo "Silver pipeline ID: $SILVER_PIPELINE_ID"
-          echo "Experiment ID: $EXPERIMENT_ID"
-
-          databricks apps get "$APP_NAME" -o json > /dev/null
-
-          databricks vector-search-endpoints get-endpoint \
-            "$VECTOR_ENDPOINT_NAME" \
-            -o json > /dev/null
-
-          databricks vector-search-indexes get-index \
-            "$VECTOR_INDEX_NAME" \
-            -o json > /dev/null
-
-          databricks bundle deployment bind \
-            rag_build_source \
-            "$RAG_JOB_ID" \
-            -t prod \
-            --auto-approve
-
-          databricks bundle deployment bind \
-            retail_workflow \
-            "$WORKFLOW_JOB_ID" \
-            -t prod \
-            --auto-approve
-
-          databricks bundle deployment bind \
-            gold_pipeline \
-            "$GOLD_PIPELINE_ID" \
-            -t prod \
-            --auto-approve
-
-          databricks bundle deployment bind \
-            silver_pipeline \
-            "$SILVER_PIPELINE_ID" \
-            -t prod \
-            --auto-approve
-
-          databricks bundle deployment bind \
-            retail_rag_agent \
-            "$EXPERIMENT_ID" \
-            -t prod \
-            --auto-approve
-
-          databricks bundle deployment bind \
-            rag_endpoint \
-            "$VECTOR_ENDPOINT_NAME" \
-            -t prod \
-            --auto-approve
-
-          databricks bundle deployment bind \
-            rag_index \
-            "$VECTOR_INDEX_NAME" \
-            -t prod \
-            --auto-approve
-
-          databricks bundle deployment bind \
-            retail_rag_assistant \
-            "$APP_NAME" \
-            -t prod \
-            --auto-approve
-
-      - name: Final PROD plan
+      - name: Confirm bundle state
         run: databricks bundle plan -t prod
