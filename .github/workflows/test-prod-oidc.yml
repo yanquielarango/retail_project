@@ -17,7 +17,6 @@ jobs:
     environment: prod
 
     env:
-      DATABRICKS_HOST: https://adb-7405604503619901.1.azuredatabricks.net
       DATABRICKS_AUTH_TYPE: github-oidc-azure
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -29,12 +28,8 @@ jobs:
       - name: Set up Databricks CLI
         uses: databricks/setup-cli@main
 
-      - name: Check PROD host
-        run: |
-          echo "DATABRICKS_HOST=$DATABRICKS_HOST"
+      - name: Verify PROD authentication configuration
+        run: databricks auth describe --host https://adb-7405604503619901.1.azuredatabricks.net
 
-      - name: Verify authentication configuration
-        run: databricks auth describe
-
-      - name: Verify Databricks authentication
-        run: databricks current-user me
+      - name: Verify PROD Databricks authentication
+        run: databricks current-user me -t prod
