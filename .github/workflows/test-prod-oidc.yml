@@ -17,7 +17,7 @@ jobs:
     environment: prod
 
     env:
-      DATABRICKS_HOST: ${{ secrets.DATABRICKS_HOST }}
+      DATABRICKS_HOST: ${{ vars.DATABRICKS_HOST }}
       DATABRICKS_AUTH_TYPE: github-oidc-azure
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
@@ -28,6 +28,9 @@ jobs:
 
       - name: Set up Databricks CLI
         uses: databricks/setup-cli@main
+
+      - name: Show target workspace
+        run: echo "DATABRICKS_HOST=$DATABRICKS_HOST"
 
       - name: Verify authentication configuration
         run: databricks auth describe
