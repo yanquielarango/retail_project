@@ -2,6 +2,9 @@ from pyspark.sql import functions as F
 
 
 def build_opportunity(df):
+
+    amount = F.col("Amount").cast("decimal(18,2)")
+
     return df.select(
         F.col("Id").alias("id"),
         F.col("IsDeleted").alias("is_deleted"),
@@ -9,14 +12,15 @@ def build_opportunity(df):
         F.col("Name").alias("name"),
         F.col("Description").alias("description"),
         F.col("StageName").alias("stage_name"),
-        F.col("Amount").alias("amount"),
+
+        amount.alias("amount"),
 
         F.when(
-            F.col("Amount") > 100000,
+            amount > 100000,
             "ENTERPRISE"
         )
         .when(
-            F.col("Amount") > 25000,
+            amount > 25000,
             "MID_MARKET"
         )
         .otherwise("SMALL")
