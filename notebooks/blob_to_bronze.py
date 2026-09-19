@@ -1,16 +1,4 @@
 # Databricks notebook source
-from pyspark.sql.types import (
-    DecimalType,
-    IntegerType,
-    StringType,
-    StructField,
-    StructType,
-)
-
-
-# ============================================================
-# Parameters from Databricks Asset Bundle
-# ============================================================
 
 dbutils.widgets.text("catalog", "")
 dbutils.widgets.text("bronze_schema", "")
@@ -22,28 +10,18 @@ bronze_schema = dbutils.widgets.get("bronze_schema")
 volume_schema = dbutils.widgets.get("volume_schema")
 blob_volume = dbutils.widgets.get("blob_volume")
 
-
-# ============================================================
-# Schema
-# ============================================================
-
-schema = StructType([
-    StructField("transaction_id", StringType(), True),
-    StructField("opportunity_name", StringType(), True),
-    StructField("product_id", StringType(), True),
-    StructField("store_id", StringType(), True),
-    StructField("quantity", IntegerType(), True),
-    StructField("selling_price", DecimalType(10, 2), True),
-    StructField("discount_amount", DecimalType(10, 2), True),
-    StructField("transaction_timestamp", StringType(), True),
-    StructField("payment_mode", StringType(), True),
-    StructField("sales_channel", StringType(), True),
-])
-
-
-# ============================================================
-# Environment-dependent paths
-# ============================================================
+schema_hints = """
+transaction_id STRING,
+opportunity_name STRING,
+product_id STRING,
+store_id STRING,
+quantity INT,
+selling_price DECIMAL(10,2),
+discount_amount DECIMAL(10,2),
+transaction_timestamp STRING,
+payment_mode STRING,
+sales_channel STRING
+"""
 
 volume_path = (
     f"/Volumes/{catalog}/{volume_schema}/{blob_volume}"
@@ -57,39 +35,36 @@ checkpoint_path = (
     f"{volume_path}/checkpoints/transactions"
 )
 
+schema_location = (
+    f"{volume_path}/schemas/transactions"
+)
+
 target_table = (
     f"{catalog}.{bronze_schema}.transactions"
 )
 
-
 print(f"Source: {source_path}")
 print(f"Checkpoint: {checkpoint_path}")
+print(f"Schema location: {schema_location}")
 print(f"Target: {target_table}")
-
-
-# ============================================================
-# Auto Loader
-# ============================================================
 
 df = (
     spark.readStream  # noqa: F821
     .format("cloudFiles")
     .option("cloudFiles.format", "csv")
     .option("cloudFiles.includeExistingFiles", "true")
+    .option("cloudFiles.schemaLocation", schema_location)
+    .option("cloudFiles.schemaHints", schema_hints)
+    .option("cloudFiles.schemaEvolutionMode", "addNewColumns")
     .option("header", "true")
     .option("nullValue", "null")
-    .schema(schema)
     .load(source_path)
 )
-
-
-# ============================================================
-# Write Bronze table
-# ============================================================
 
 query = (
     df.writeStream
     .option("checkpointLocation", checkpoint_path)
+    .option("mergeSchema", "true")
     .trigger(availableNow=True)
     .toTable(target_table)
 )

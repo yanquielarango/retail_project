@@ -27,6 +27,7 @@ The project has separate DEV and PROD environments. Deployment is automated with
 - [AI-Assisted Development and Guardrails](#ai-assisted-development-and-guardrails)
 - [Demo Flow](#demo-flow)
 - [Key Outcomes](#key-outcomes)
+
 ## Project Overview
  
 Retail companies usually work with different systems: CRM platforms, operational databases, transaction files, and analytics tools. This project brings all of them into one governed data platform.
@@ -44,6 +45,7 @@ Main parts of the solution:
 - Power BI analytics
 - a Databricks RAG application backed by AI Search
 - DEV-to-PROD deployment through CI/CD
+
 The result is a platform where the same code and Asset Bundle configuration move across environments, without recreating production resources by hand.
  
 ## Business Problem
@@ -108,16 +110,23 @@ Cross-cutting platform capabilities:
 - **Deployment:** Databricks Asset Bundles
 - **CI/CD:** GitHub Actions
 - **Observability:** pipeline execution history, test results, and MLflow tracing for the AI application
+
 ## Data Sources
  
 | Source | Data | Ingestion Pattern |
 |---|---|---|
 | Salesforce CRM | Account, Opportunity | Managed incremental ingestion |
-| PostgreSQL / Neon | Product Catalog, Inventory | Managed database ingestion |
+| PostgreSQL / Neon | Product Catalog, Inventory | Managed CDC-style database ingestion |
 | Cloud Storage | Transaction CSV files | Auto Loader |
 | Unity Catalog Volume | Platform PDF documentation | RAG document ingestion |
  
 New transaction files can arrive at any time. Auto Loader picks up only the new files, so the full history never needs to be reloaded.
+
+### Schema Evolution and Re-runs
+
+The ingestion and transformation layers are designed for incremental processing and safe re-runs. Auto Loader processes newly arriving transaction files without re-reading the full history, while the Silver layer applies type conversion, validation rules, and expectations before data can reach Gold.
+
+Schema-related changes are handled at the ingestion and transformation layers. Unexpected or invalid data is isolated through quality controls instead of silently reaching business-ready models. The pipelines are designed to be idempotent and re-runnable so the same deployment can be executed again without duplicating business data.
  
 ## Medallion Architecture
  
@@ -131,6 +140,7 @@ What it does:
 - works as an auditable landing layer
 - supports replay and reprocessing
 - keeps ingestion logic separate from business logic
+
 ### Silver
  
 The Silver layer cleans and validates the source data.
@@ -145,6 +155,7 @@ Typical transformations:
 - derived attributes
 - product segmentation
 - business-rule validation
+
 Lakeflow Expectations run at this stage to catch invalid records as early as possible.
  
 Current Silver quality coverage:
@@ -168,6 +179,7 @@ Gold feeds:
 - Power BI
 - data quality integration tests
 - the RAG source builder, for curated product context
+
 ## Gold Data Model
  
 ```mermaid
@@ -259,6 +271,7 @@ This distinction matters:
  
 - row-level failure → the record goes to quarantine
 - pipeline-level failure → downstream processing stops
+
 Quarantined data does not block Gold on its own. Gold continues when DQ succeeds and reconciliation proves no records were lost.
  
 ### Reconciliation rule
@@ -277,6 +290,7 @@ Gold quality checks cover:
 - uniqueness
 - referential integrity between `fact_sales` and the dimensions
 - expected model consistency
+
 ## Testing Strategy
  
 The test suite has two layers.
@@ -290,6 +304,7 @@ Coverage includes transformations for:
 - transactions
 - product catalog
 - `fact_sales`
+
 Run locally:
  
 ```bash
@@ -304,6 +319,7 @@ Current coverage:
  
 - DQX reconciliation
 - Gold data quality validation
+
 Example: `test_dqx_reconciliation` checks that
  
 ```
@@ -324,6 +340,7 @@ The dashboard answers questions like:
 - How do suppliers compare?
 - What is the customer segment mix?
 - Which sales channels contribute most?
+
 Power BI is the main business-facing layer. The RAG application does not duplicate this analytical logic.
  
 ## RAG Application
@@ -335,6 +352,7 @@ The RAG knowledge base combines:
 - curated platform documentation, stored as PDFs in a Unity Catalog Volume
 - structured product information from Gold
 - aggregated product sales metrics
+
 ### RAG pipeline
  
 ```mermaid
@@ -371,11 +389,13 @@ The prepared search table includes fields such as:
 - `product_id`
 - `category`
 - `product_segment`
+
 ### AI Search
  
 - **Index type:** Delta Sync
 - **Sync mode:** Triggered
 - **Embedding model:** `databricks-qwen3-embedding-0-6b`
+
 CI/CD triggers the AI Search sync and waits for the pipeline update to finish before it deploys or restarts the app.
  
 ### Foundation model
@@ -393,6 +413,7 @@ The assistant is instructed to:
 - avoid unsupported rankings or comparisons
 - distinguish quarantined rows from pipeline failures
 - distinguish pre-Gold validation from Gold-model validation
+
 MLflow tracing is on for agent execution and observability.
  
 ## Governance and Security
@@ -406,6 +427,7 @@ The platform uses dedicated schemas for:
 - Quarantine
 - AI/RAG
 - Volumes
+
 Security controls:
  
 - Unity Catalog privileges
@@ -413,8 +435,26 @@ Security controls:
 - column-level security where needed
 - Azure Key Vault-backed secret management
 - environment-scoped CI/CD credentials
-- service-principal authentication for production automation
-No application or source credential is stored in the repository.
+- GitHub OIDC for production authentication
+- service-principal / workload-identity authentication for automated PROD deployment
+
+### Row-Level and Column-Level Security
+
+`dim_customer` is protected with Unity Catalog row filters and column masks.
+
+The row filter uses `billing_state`:
+
+- privileged users can access all customer regions
+- non-privileged users are restricted to Mazowieckie
+
+The column mask protects `phone`:
+
+- privileged users see the original phone value
+- non-privileged users see a masked value
+
+The security functions are created automatically before the Gold pipeline runs, and the policies are attached declaratively to the Gold materialized view.
+
+No application or source credential is stored in the repository. Production CI/CD uses OIDC rather than a long-lived Databricks personal access token.
  
 ## CI/CD and Deployment
  
@@ -477,15 +517,19 @@ Production deployment uses a dedicated paid workspace, with automated authentica
 - the same bundle is promoted across environments
 - tests gate the deployment
 - production changes are reproducible
+
 ## Advanced Capability
  
 The project uses managed incremental ingestion for external operational sources, combined with file-based incremental processing through Auto Loader.
+
+For the PostgreSQL source, hosted in Neon, ingestion follows a CDC-style pattern. Only new or changed operational data needs to move through the ingestion process instead of reloading the full source on every run.
  
 This shows how one Lakehouse platform can ingest:
  
-- SaaS CRM data
-- operational relational data
-- incremental transaction files
+- SaaS CRM data through managed incremental ingestion
+- operational relational data from PostgreSQL / Neon through CDC-style incremental ingestion
+- incremental transaction files through Auto Loader
+
 while still converging on the same Bronze → Silver → Gold architecture.
  
 ## Repository Structure
@@ -499,7 +543,8 @@ retail_project-1/
 │       ├── validate.yml
 │       ├── deploy-dev.yml
 │       ├── integration-tests.yml
-│       └── rag-dev.yml
+│       ├── rag-dev.yml
+│       └── deploy-prod.yml
 │
 ├── app/
 │   └── retail_rag_assistant/
@@ -520,6 +565,12 @@ retail_project-1/
 │   └── Databricks App resource
 │
 ├── src/
+│   ├── governance/
+│   │   └── setup_customer_security.py
+│   │
+│   ├── gold/
+│   │   └── dim_customer.py
+│   │
 │   ├── quality/
 │   │   └── run_dqx.py
 │   │
@@ -548,6 +599,7 @@ retail_project-1/
 - Databricks CLI
 - access to the Databricks DEV workspace
 - valid environment credentials
+
 ### Install dependencies
  
 ```bash
@@ -669,6 +721,7 @@ AI tools helped speed up parts of the work, including:
 - test design
 - architecture discussion
 - refactoring suggestions
+
 AI suggestions were not treated as automatically correct. Guardrails included:
  
 - checking behavior with unit tests
@@ -678,6 +731,7 @@ AI suggestions were not treated as automatically correct. Guardrails included:
 - verifying RAG outputs against source data
 - keeping the application prompt limited to retrieved context
 - blocking unsupported assumptions in AI responses
+
 AI worked as an accelerator. Tests and platform execution stayed the source of truth.
  
 ## Demo Flow
@@ -689,11 +743,13 @@ Suggested order for the final demo:
 3. Bronze → Silver → DQX → Gold processing
 4. Data quality quarantine and reconciliation
 5. Gold star schema
-6. Power BI analytics
-7. RAG application
-8. GitHub Actions CI/CD
-9. DEV → PROD automated deployment
-10. Q&A
+6. Unity Catalog RLS / CLS
+7. Power BI analytics
+8. RAG application
+9. GitHub Actions CI/CD
+10. DEV → PROD automated deployment
+11. Q&A
+
 The goal is to show one integrated platform with automated quality gates and reproducible deployment, not a set of isolated notebooks.
  
 ## Key Outcomes
@@ -703,11 +759,14 @@ This project shows practical experience with:
 - Databricks and Azure
 - Lakehouse architecture
 - batch and incremental ingestion
+- CDC-style incremental ingestion
 - Auto Loader
 - Lakeflow Declarative Pipelines
 - Databricks Jobs
 - Delta Lake
 - Unity Catalog
+- row-level security (RLS)
+- column-level security (CLS)
 - DQX
 - automated data quality controls
 - PySpark
@@ -721,9 +780,9 @@ This project shows practical experience with:
 - Databricks Apps
 - MLflow tracing
 - production-oriented data platform design
+
 ## Author
  
 Yanquiel Arango
  
 Retail Data Platform — Databricks Academy Final Project
- 
