@@ -50,6 +50,12 @@ variables:
   salesforce_pipeline_id:
     description: Existing Salesforce Lakeflow Connect pipeline ID
 
+  genie_warehouse_id:
+    description: SQL Warehouse used by the Genie Space
+
+  genie_parent_path:
+    description: Workspace folder for the Genie Space
+
 targets:
   dev:
     default: true
@@ -62,6 +68,8 @@ targets:
 
     variables:
       catalog: dbr_dev
+      genie_warehouse_id: 1a8ff5cbf85f90de
+      genie_parent_path: /Workspace/Users/yanquiel.arango@gmail.com
       postgres_pipeline_id: c9e7e6e4-3304-4702-9692-6488eb75df2a
       salesforce_pipeline_id: 2d5762da-9458-47c5-b224-c24459f163ad
 
@@ -74,5 +82,7 @@ targets:
 
     variables:
       catalog: dbr_dev
+      genie_warehouse_id: 3ed106620db591d9
+      genie_parent_path: /Workspace/Users/yanquiel@softserve.academy
       postgres_pipeline_id: cefbe66e-b1f9-4d32-8dae-cb10df26bd25
       salesforce_pipeline_id: 2bcf0095-ff34-4de3-966c-14a87d051481

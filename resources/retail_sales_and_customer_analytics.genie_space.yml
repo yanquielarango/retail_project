@@ -1,0 +1,7 @@
+resources:
+  genie_spaces:
+    retail_sales_and_customer_analytics:
+      title: "Retail Sales and Customer Analytics"
+      warehouse_id: ${var.genie_warehouse_id}
+      file_path: ../src/retail_sales_and_customer_analytics.geniespace.json
+      parent_path: ${var.genie_parent_path}
