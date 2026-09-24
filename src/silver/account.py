@@ -24,9 +24,12 @@ from transformations.silver.account_functions import build_account
     "billing_city IS NOT NULL AND LENGTH(TRIM(billing_city)) > 0"
 )
 def account():
+
+    catalog = spark.conf.get("catalog")  # noqa: F821
+
     source_df = (
         spark.read  # noqa: F821
-        .table("dbr_dev.salesforce_bronze.account")
+        .table(f"{catalog}.salesforce_bronze.account")
     )
 
     return build_account(source_df)

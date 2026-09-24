@@ -56,6 +56,10 @@ variables:
   genie_parent_path:
     description: Workspace folder for the Genie Space
 
+  genie_file_path:
+    description: Genie Space definition file
+
+
 targets:
   dev:
     default: true
@@ -70,6 +74,7 @@ targets:
       catalog: dbr_dev
       genie_warehouse_id: 1a8ff5cbf85f90de
       genie_parent_path: /Workspace/Users/yanquiel.arango@gmail.com
+      genie_file_path: ../src/genie/retail_sales_and_customer_analytics.dev.geniespace.json
       postgres_pipeline_id: c9e7e6e4-3304-4702-9692-6488eb75df2a
       salesforce_pipeline_id: 2d5762da-9458-47c5-b224-c24459f163ad
 
@@ -77,12 +82,13 @@ targets:
     mode: production
 
     workspace:
-      host: https://adb-7405604503619901.1.azuredatabricks.net
+      host: https://adb-7405615123305702.2.azuredatabricks.net
       root_path: /Workspace/retail-data-platform-prod/.bundle/${bundle.name}/${bundle.target}
 
     variables:
-      catalog: dbr_dev
-      genie_warehouse_id: 3ed106620db591d9
+      catalog: dbr_dev_trial
+      genie_warehouse_id: c0152a553a7a830f
       genie_parent_path: /Workspace/Users/yanquiel@softserve.academy
-      postgres_pipeline_id: cefbe66e-b1f9-4d32-8dae-cb10df26bd25
-      salesforce_pipeline_id: 2bcf0095-ff34-4de3-966c-14a87d051481
+      genie_file_path: ../src/genie/retail_sales_and_customer_analytics.prod.geniespace.json
+      postgres_pipeline_id: a7f85588-89fc-4b05-b47d-469b17e33875
+      salesforce_pipeline_id: cf4e9b76-7e62-4a10-b4a0-e60e8537cc28

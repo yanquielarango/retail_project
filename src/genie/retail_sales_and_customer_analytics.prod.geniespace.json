@@ -1,0 +1,420 @@
+{
+  "data_sources": {
+    "tables": [
+      {
+        "column_configs": [
+          {
+            "column_name": "annual_revenue"
+          },
+          {
+            "column_name": "billing_city"
+          },
+          {
+            "column_name": "billing_country"
+          },
+          {
+            "column_name": "billing_state"
+          },
+          {
+            "column_name": "customer_id"
+          },
+          {
+            "column_name": "customer_name"
+          },
+          {
+            "column_name": "customer_type"
+          },
+          {
+            "column_name": "description"
+          },
+          {
+            "column_name": "industry"
+          },
+          {
+            "column_name": "number_of_employees"
+          },
+          {
+            "column_name": "phone"
+          },
+          {
+            "column_name": "website"
+          }
+        ],
+        "identifier": "dbr_dev_trial.retail_gold.dim_customer"
+      },
+      {
+        "column_configs": [
+          {
+            "column_name": "date_key",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "day",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "day_name",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "day_of_week_sort",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "full_date",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "is_weekend",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "month",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "month_name",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "month_start",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "month_year",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "month_year_sort",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "quarter",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "quarter_name",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "week_of_year",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "year",
+            "enable_format_assistance": true
+          }
+        ],
+        "identifier": "dbr_dev_trial.retail_gold.dim_date"
+      },
+      {
+        "column_configs": [
+          {
+            "column_name": "brand",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "category",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "launch_date",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "product_id",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "product_name",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "product_segment",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "subcategory",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "supplier_name",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "unit_price",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "updated_at",
+            "enable_format_assistance": true
+          }
+        ],
+        "identifier": "dbr_dev_trial.retail_gold.dim_product"
+      },
+      {
+        "column_configs": [
+          {
+            "column_name": "customer_id",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "date_key",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "discount_amount",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "net_sales_amount",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "payment_mode",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "product_id",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "quantity",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "sales_channel",
+            "enable_entity_matching": true,
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "selling_price",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "store_id",
+            "enable_format_assistance": true
+          },
+          {
+            "column_name": "transaction_id",
+            "enable_format_assistance": true
+          }
+        ],
+        "identifier": "dbr_dev_trial.retail_gold.fact_sales"
+      }
+    ]
+  },
+  "instructions": {
+    "example_question_sqls": [
+      {
+        "id": "01f1b6b5b3e619939808121b543504c9",
+        "question": [
+          "Show the top 10 customers by net sales."
+        ],
+        "sql": [
+          "SELECT\r\n",
+          "  c.customer_id,\r\n",
+          "  c.customer_name,\r\n",
+          "  c.customer_type,\r\n",
+          "  SUM(f.net_sales_amount) AS total_net_sales\r\n",
+          "FROM dbr_dev_trial.retail_gold.fact_sales f\r\n",
+          "JOIN dbr_dev_trial.retail_gold.dim_customer c\r\n",
+          "  ON f.customer_id = c.customer_id\r\n",
+          "GROUP BY\r\n",
+          "  c.customer_id,\r\n",
+          "  c.customer_name,\r\n",
+          "  c.customer_type\r\n",
+          "ORDER BY\r\n",
+          "  total_net_sales DESC\r\n",
+          "LIMIT 10;"
+        ]
+      },
+      {
+        "id": "01f1b6b70b221438bb2cc46572b11b6f",
+        "question": [
+          "What are the monthly total net sales?"
+        ],
+        "sql": [
+          "SELECT\r\n",
+          "  d.`month_year` AS month,\r\n",
+          "  d.`month_year_sort` AS month_sort,\r\n",
+          "  SUM(f.`net_sales_amount`) AS total_net_sales\r\n",
+          "FROM\r\n",
+          "  `dbr_dev_trial`.`retail_gold`.`fact_sales` f\r\n",
+          "JOIN\r\n",
+          "  `dbr_dev_trial`.`retail_gold`.`dim_date` d\r\n",
+          "    ON f.`date_key` = d.`date_key`\r\n",
+          "GROUP BY\r\n",
+          "  d.`month_year`,\r\n",
+          "  d.`month_year_sort`\r\n",
+          "ORDER BY\r\n",
+          "  d.`month_year_sort`;"
+        ]
+      },
+      {
+        "id": "01f1b6b784511e069aca7298f2875b6d",
+        "question": [
+          "Show net sales by product category"
+        ],
+        "sql": [
+          "SELECT\r\n",
+          "  p.`category`,\r\n",
+          "  SUM(f.`net_sales_amount`) AS total_net_sales\r\n",
+          "FROM\r\n",
+          "  `dbr_dev_trial`.`retail_gold`.`fact_sales` f\r\n",
+          "JOIN\r\n",
+          "  `dbr_dev_trial`.`retail_gold`.`dim_product` p\r\n",
+          "    ON f.`product_id` = p.`product_id`\r\n",
+          "GROUP BY\r\n",
+          "  p.`category`\r\n",
+          "ORDER BY\r\n",
+          "  total_net_sales DESC;"
+        ]
+      }
+    ],
+    "join_specs": [
+      {
+        "id": "01f1b6b5dcff109da6820d51eb31dbba",
+        "left": {
+          "alias": "fact_sales",
+          "identifier": "dbr_dev_trial.retail_gold.fact_sales"
+        },
+        "right": {
+          "alias": "dim_customer",
+          "identifier": "dbr_dev_trial.retail_gold.dim_customer"
+        },
+        "sql": [
+          "`fact_sales`.`customer_id` = `dim_customer`.`customer_id`",
+          "--rt=FROM_RELATIONSHIP_TYPE_MANY_TO_ONE--"
+        ]
+      },
+      {
+        "id": "01f1b6b66f5816b5b88180e0b353b2ce",
+        "left": {
+          "alias": "fact_sales",
+          "identifier": "dbr_dev_trial.retail_gold.fact_sales"
+        },
+        "right": {
+          "alias": "dim_product",
+          "identifier": "dbr_dev_trial.retail_gold.dim_product"
+        },
+        "sql": [
+          "`fact_sales`.`product_id` = `dim_product`.`product_id`",
+          "--rt=FROM_RELATIONSHIP_TYPE_MANY_TO_ONE--"
+        ]
+      },
+      {
+        "id": "01f1b6b6764e1bc0a257150cc40f16f9",
+        "left": {
+          "alias": "fact_sales",
+          "identifier": "dbr_dev_trial.retail_gold.fact_sales"
+        },
+        "right": {
+          "alias": "dim_date",
+          "identifier": "dbr_dev_trial.retail_gold.dim_date"
+        },
+        "sql": [
+          "`fact_sales`.`date_key` = `dim_date`.`date_key`",
+          "--rt=FROM_RELATIONSHIP_TYPE_MANY_TO_ONE--"
+        ]
+      }
+    ],
+    "sql_snippets": {
+      "measures": [
+        {
+          "display_name": "net sales",
+          "id": "01f1b6b606f9116ab5184d3d95b8b70d",
+          "instruction": [
+            "Use this measure as the main sales metric when users ask about\n",
+            "net sales, total sales, sales amount, or revenue."
+          ],
+          "sql": [
+            "SUM(fact_sales.net_sales_amount)"
+          ],
+          "synonyms": [
+            "net sales total net sales sales sales amount revenue"
+          ]
+        }
+      ]
+    },
+    "text_instructions": [
+      {
+        "content": [
+          "This Genie Space is designed for Retail Sales and Customer Analytics.\r\n",
+          "\r\n",
+          "The main data model is a star schema in the Gold layer.\r\n",
+          "\r\n",
+          "Use these tables:\r\n",
+          "- fact_sales for sales and transaction metrics.\r\n",
+          "- dim_customer for customer information.\r\n",
+          "- dim_product for product information.\r\n",
+          "- dim_date for date and time analysis.\r\n",
+          "\r\n",
+          "General rules:\r\n",
+          "\r\n",
+          "1. Use fact_sales as the main table for sales analysis.\r\n",
+          "\r\n",
+          "2. Use dim_customer when the question is related to customers, customer type,\r\n",
+          "location, industry, annual revenue, or number of employees.\r\n",
+          "\r\n",
+          "3. Use dim_product when the question is related to products, categories,\r\n",
+          "subcategories, brands, or product performance.\r\n",
+          "\r\n",
+          "4. Use dim_date for monthly, yearly, quarterly, and other time-based analysis.\r\n",
+          "\r\n",
+          "5. When a question requires information from different tables,\r\n",
+          "join the fact table with the corresponding dimension table using the\r\n",
+          "available keys.\r\n",
+          "\r\n",
+          "6. For sales or revenue questions, use net sales as the main sales metric\r\n",
+          "unless the user explicitly asks for another metric.\r\n",
+          "\r\n",
+          "7. Do not use product unit price as total sales.\r\n",
+          "Use the sales value stored in fact_sales.\r\n",
+          "\r\n",
+          "8. When showing monetary values, use two decimal places.\r\n",
+          "\r\n",
+          "9. For trends over time, sort the result chronologically.\r\n",
+          "\r\n",
+          "10. For Top N questions, sort the requested metric in descending order.\r\n",
+          "\r\n",
+          "11. Do not invent values or business information that is not available\r\n",
+          "in the tables.\r\n",
+          "\r\n",
+          "12. If the question is ambiguous and cannot be answered correctly from\r\n",
+          "the available data, explain what information is missing.\r\n",
+          "\r\n",
+          "13. Do not speculate about the causes of changes, anomalies, increases,\r\n",
+          "decreases, or unusual values in the data.\r\n",
+          "\r\n",
+          "Only describe conclusions that can be directly supported by the available data.\r\n",
+          "\r\n",
+          "Never assume that a low or unusual value means incomplete data, missing data,\r\n",
+          "a business disruption, seasonality, an error, or another cause unless there\r\n",
+          "is explicit evidence for that explanation in the available data.\r\n",
+          "\r\n",
+          "If the cause of a change cannot be determined from the available data,\r\n",
+          "do not suggest a possible cause. Simply report the observed result.\r\n",
+          "\r\n",
+          "For example:\r\n",
+          "Correct: \"May 2026 recorded the lowest net sales at $13,253.\"\r\n",
+          "Incorrect: \"May 2026 recorded only $13,253, suggesting incomplete data.\""
+        ],
+        "id": "01f1b6b4d3401aa09723e21dbe867ec0"
+      }
+    ]
+  },
+  "version": 2
+}
+

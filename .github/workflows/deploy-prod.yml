@@ -14,7 +14,7 @@ jobs:
     environment: prod
 
     env:
-      DATABRICKS_HOST: https://adb-7405604503619901.1.azuredatabricks.net
+      DATABRICKS_HOST: https://adb-7405615123305702.2.azuredatabricks.net
       DATABRICKS_AUTH_TYPE: github-oidc-azure
       ARM_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
       ARM_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}

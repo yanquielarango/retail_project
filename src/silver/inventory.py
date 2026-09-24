@@ -36,9 +36,12 @@ from transformations.silver.inventory_functions import build_inventory
     "last_stock_update IS NOT NULL"
 )
 def inventory():
+
+    catalog = spark.conf.get("catalog")  # noqa: F821
+
     source_df = (
         spark.readStream  # noqa: F821
-        .table("dbr_dev.postgres_bronze.inventory")
+        .table(f"{catalog}.postgres_bronze.inventory")
     )
 
     return build_inventory(source_df)
