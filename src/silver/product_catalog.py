@@ -32,9 +32,12 @@ from transformations.silver.product_catalog_functions import build_product_catal
     "supplier_name IS NOT NULL"
 )
 def product_catalog():
+
+    catalog = spark.conf.get("catalog")  # noqa: F821
+
     source_df = (
         spark.readStream  # noqa: F821
-        .table("dbr_dev.postgres_bronze.product_catalog")
+        .table(f"{catalog}.postgres_bronze.product_catalog")
     )
 
     return build_product_catalog(source_df)

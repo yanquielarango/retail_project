@@ -44,9 +44,12 @@ from transformations.silver.transactions_functions import build_transactions
     "transaction_timestamp IS NOT NULL"
 )
 def transactions():
+
+    catalog = spark.conf.get("catalog")  # noqa: F821
+
     source_df = (
         spark.readStream  # noqa: F821
-        .table("dbr_dev.blob_bronze.transactions")
+        .table(f"{catalog}.blob_bronze.transactions")
     )
 
     return build_transactions(source_df)

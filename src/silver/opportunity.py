@@ -38,9 +38,12 @@ from transformations.silver.opportunity_functions import build_opportunity
     """
 )
 def opportunity():
+
+    catalog = spark.conf.get("catalog")  # noqa: F821
+
     source_df = (
         spark.readStream  # noqa: F821
-        .table("dbr_dev.salesforce_bronze.opportunity")
+        .table(f"{catalog}.salesforce_bronze.opportunity")
     )
 
     return build_opportunity(source_df)

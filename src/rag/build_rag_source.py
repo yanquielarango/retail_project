@@ -1,3 +1,5 @@
+import argparse
+
 from pdf_documents import (
     parse_pdf_documents,
     read_pdf_documents,
@@ -13,50 +15,65 @@ from search_documents import (
     combine_search_chunks,
 )
 
-CATALOG = "dbr_dev"
-GOLD_SCHEMA = "retail_gold"
-AI_SCHEMA = "retail_ai"
-VOLUME_SCHEMA = "volumes"
-PDF_VOLUME = "retail_knowledge"
 
-PDF_VOLUME_PATH = f"/Volumes/{CATALOG}/{VOLUME_SCHEMA}/{PDF_VOLUME}/pdf"
-RAG_TABLE = f"{CATALOG}.{AI_SCHEMA}.rag_chunks"
+def parse_args():
+    parser = argparse.ArgumentParser()
+
+    parser.add_argument("--catalog", required=True)
+    parser.add_argument("--gold-schema", required=True)
+    parser.add_argument("--ai-schema", required=True)
+    parser.add_argument("--volume-schema", required=True)
+    parser.add_argument("--pdf-volume", required=True)
+
+    return parser.parse_args()
 
 
 def main() -> None:
+    args = parse_args()
+
     spark = SparkSession.getActiveSession()
 
     if spark is None:
         spark = SparkSession.builder.getOrCreate()
 
-    # ---------------------------------------------------------
-    # Gold tables
-    # ---------------------------------------------------------
+    catalog = args.catalog
+    gold_schema = args.gold_schema
+    ai_schema = args.ai_schema
+    volume_schema = args.volume_schema
+    pdf_volume = args.pdf_volume
 
-    dim_product_df = spark.table(f"{CATALOG}.{GOLD_SCHEMA}.dim_product")
-    fact_sales_df = spark.table(f"{CATALOG}.{GOLD_SCHEMA}.fact_sales")
+    pdf_volume_path = (
+        f"/Volumes/{catalog}/{volume_schema}/{pdf_volume}/pdf"
+    )
 
-    # ---------------------------------------------------------
-    # Structured product documents
-    # ---------------------------------------------------------
+    rag_table = f"{catalog}.{ai_schema}.rag_chunks"
 
-    product_sales_summary_df = build_product_sales_summary(fact_sales_df)
+
+    dim_product_df = spark.table(
+        f"{catalog}.{gold_schema}.dim_product"
+    )
+
+    fact_sales_df = spark.table(
+        f"{catalog}.{gold_schema}.fact_sales"
+    )
+
+
+    product_sales_summary_df = build_product_sales_summary(
+        fact_sales_df
+    )
 
     product_documents_df = build_product_documents(
         dim_product_df,
         product_sales_summary_df,
     )
 
-    # ---------------------------------------------------------
-    # PDF documents
-    # ---------------------------------------------------------
 
-    pdf_df = read_pdf_documents(spark, PDF_VOLUME_PATH)
+    pdf_df = read_pdf_documents(
+        spark,
+        pdf_volume_path,
+    )
+
     parsed_pdf_df = parse_pdf_documents(pdf_df)
-
-    # ---------------------------------------------------------
-    # Semantic chunks
-    # ---------------------------------------------------------
 
     product_chunks_df = build_product_search_chunks(
         spark,
@@ -68,25 +85,20 @@ def main() -> None:
         parsed_pdf_df,
     )
 
-    # ---------------------------------------------------------
-    # Unified RAG dataset
-    # ---------------------------------------------------------
 
     rag_chunks_df = combine_search_chunks(
         product_chunks_df,
         pdf_chunks_df,
     )
 
-    # ---------------------------------------------------------
-    # Write Delta source table for AI Search
-    # ---------------------------------------------------------
 
     (
-        rag_chunks_df.write.format("delta")
+        rag_chunks_df.write
+        .format("delta")
         .mode("overwrite")
         .option("overwriteSchema", "true")
         .option("delta.enableChangeDataFeed", "true")
-        .saveAsTable(RAG_TABLE)
+        .saveAsTable(rag_table)
     )
 
 

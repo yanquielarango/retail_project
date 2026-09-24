@@ -2,6 +2,7 @@ name: Deploy DEV
 
 on:
   workflow_call:
+  workflow_dispatch:
 
 jobs:
   deploy_dev:

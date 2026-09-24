@@ -1,13 +1,15 @@
-name: Retail Data Platform CI/CD - Refactor Test
+name: Retail Data Platform CI/CD
 
 on:
   push:
     branches:
-      - refactor/github-actions-workflows
+      - main
 
   pull_request:
     branches:
       - main
+
+  workflow_dispatch:
 
 jobs:
   validate:

@@ -12,6 +12,9 @@ resources:
       catalog: ${resources.schemas.silver.catalog_name}
       schema: ${resources.schemas.silver.name}
 
+      configuration:
+        catalog: ${var.catalog}
+
       serverless: true
       root_path: ../src
 
