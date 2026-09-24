@@ -48,7 +48,7 @@ def main() -> None:
 
     rag_table = f"{catalog}.{ai_schema}.rag_chunks"
 
-  
+
     dim_product_df = spark.table(
         f"{catalog}.{gold_schema}.dim_product"
     )
@@ -57,7 +57,7 @@ def main() -> None:
         f"{catalog}.{gold_schema}.fact_sales"
     )
 
-  
+
     product_sales_summary_df = build_product_sales_summary(
         fact_sales_df
     )
@@ -67,7 +67,7 @@ def main() -> None:
         product_sales_summary_df,
     )
 
-  
+
     pdf_df = read_pdf_documents(
         spark,
         pdf_volume_path,
@@ -85,7 +85,7 @@ def main() -> None:
         parsed_pdf_df,
     )
 
- 
+
     rag_chunks_df = combine_search_chunks(
         product_chunks_df,
         pdf_chunks_df,
