@@ -44,7 +44,6 @@ from transformations.silver.transactions_functions import build_transactions
     "transaction_timestamp IS NOT NULL"
 )
 def transactions():
-
     catalog = spark.conf.get("catalog")  # noqa: F821
 
     source_df = (
@@ -52,4 +51,6 @@ def transactions():
         .table(f"{catalog}.blob_bronze.transactions")
     )
 
-    return build_transactions(source_df)
+    transformed_df = build_transactions(source_df)
+
+    return transformed_df.dropDuplicates(["transaction_id"])
