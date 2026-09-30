@@ -1038,4 +1038,4 @@ This project shows practical experience with:
 
 Yanquiel Arango
 
-Retail Data Platform — Databricks Academy Final Project..
+Retail Data Platform — Databricks Academy Final Project
