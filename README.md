@@ -25,8 +25,6 @@ The project has separate DEV and PROD environments. Deployment is automated with
 - [Deployment](#deployment)
 - [Design Decisions](#design-decisions)
 - [Cost and Performance Trade-offs](#cost-and-performance-trade-offs)
-- [AI-Assisted Development and Guardrails](#ai-assisted-development-and-guardrails)
-- [Demo Flow](#demo-flow)
 - [Key Outcomes](#key-outcomes)
 
 ## Project Overview
@@ -959,9 +957,6 @@ PROD deployment is intentionally manual.
 
 This keeps production controlled while still making deployments reproducible.
 
-**No dbt layer**
-
-A separate dbt layer was left out on purpose.
 
 Lakeflow PySpark transformations Gold dimensional modeling DQX Expectations Power BI and Genie already cover the transformation and analytics needs of this project.
 
@@ -1003,51 +998,8 @@ DEV and PROD Genie Spaces use environment specific SQL Warehouses.
 
 Benefit: the same version controlled Genie configuration can be promoted without hardcoding one workspace specific warehouse.
 
-## AI-Assisted Development and Guardrails
 
-AI tools helped speed up parts of the work including:
 
-- code review
-- troubleshooting
-- documentation
-- test design
-- architecture discussion
-- refactoring suggestions
-- Genie configuration review
-
-AI suggestions were not treated as automatically correct.
-
-Guardrails included:
-
-- checking behavior with unit tests
-- checking platform behavior with integration tests
-- reviewing deployment plans before applying changes
-- checking generated Databricks configuration against real workspace behavior
-- testing Genie generated SQL against the Gold model
-- verifying RAG outputs against source data
-- keeping the RAG application prompt limited to retrieved context
-- preventing unsupported assumptions in AI responses
-
-AI worked as an accelerator. Tests source data generated SQL and platform execution stayed the source of truth.
-
-## Demo Flow
-
-Suggested order for the final demo:
-
-1. Business problem and platform architecture
-2. Source systems and ingestion
-3. Bronze → Silver → DQX → Governance → Gold processing
-4. Data quality quarantine and reconciliation
-5. Gold star schema
-6. Unity Catalog RLS / CLS
-7. Power BI analytics
-8. AI/BI Genie natural language analytics
-9. RAG application
-10. GitHub Actions CI/CD
-11. DEV → PROD bundle deployment
-12. Q&A
-
-The goal is to show one integrated platform with automated quality gates analytical consumption AI capabilities and reproducible deployment. It is not a set of isolated notebooks.
 
 ## Key Outcomes
 
